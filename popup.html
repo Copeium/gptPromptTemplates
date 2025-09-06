@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Prompt Templates</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; width:360px; margin:12px; }
+    h1 { font-size:16px; margin:0 0 8px 0; }
+    label { font-size:12px; display:block; margin-top:8px; }
+    input[type="text"], textarea { width:100%; box-sizing:border-box; padding:6px; margin-top:4px; font-size:13px; }
+    textarea { min-height:90px; resize:vertical; }
+    .template { border:1px solid #ddd; padding:8px; margin-top:8px; border-radius:6px; background:#fafafa; }
+    .tpl-row { display:flex; gap:8px; align-items:center; }
+    .keyword { font-weight:600; min-width:90px; }
+    .del { margin-left:auto; background:#ff6b6b; color:white; border:none; padding:6px 8px; border-radius:6px; cursor:pointer; }
+    button { padding:8px 10px; border-radius:6px; border:1px solid #ccc; background:#fff; cursor:pointer; }
+    .small { font-size:12px; padding:6px 8px; }
+    .empty { color:#666; font-size:13px; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <h1>ChatGPT Prompt Templates by Faith Lawrence</h1>
+
+  <div>
+    <label for="kw">Keyword (no leading #, use letters/numbers/_ or -)</label>
+    <input id="kw" type="text" placeholder="e.g. summary" />
+    <label for="tpl">Template text (what will be inserted)</label>
+    <textarea id="tpl" placeholder="Write the prompt/instructions here..."></textarea>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button id="add" class="small">Add / Update</button>
+      <button id="clearAll" class="small">Clear All</button>
+    </div>
+  </div>
+
+  <h2 style="font-size:13px; margin-top:12px;">Saved templates</h2>
+  <div id="list"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
