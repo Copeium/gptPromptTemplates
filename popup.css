@@ -1,85 +1,189 @@
+/* popup.css - Compact Dark Mode with Orange Accents */
+
+/* --- Variables --- */
+:root {
+    --bg-dark: #1e1e1e;       /* Main background */
+    --surface-dark: #252526;  /* Card/Form background */
+    --text-light: #f0f0f0;    /* Primary text color */
+    --text-muted: #aaaaaa;    /* Secondary text/placeholder color */
+    --accent-orange: #ff9800; /* Primary accent color (Orange 500) */
+    --accent-hover: #e68a00;  /* Darker orange for hover */
+    --success-green: #4caf50; /* Green for Save/Success */
+    --danger-red: #f44336;    /* Red for Delete */
+}
+
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-  width: 360px;
-  margin: 12px;
-  background: #1e1e1e;
-  color: #f1f1f1;
+    width: 300px; /* Compact width */
+    padding: 12px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-light);
 }
-h1 {
-  font-size: 16px;
-  margin: 0 0 8px 0;
-  color: #ffffff;
+
+h2 {
+    color: var(--accent-orange);
+    border-bottom: 2px solid var(--accent-orange);
+    padding-bottom: 5px;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
 }
+
+h3 {
+    color: var(--text-light);
+    margin-top: 15px;
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+/* --- Toggle Switch FIX --- */
+#toggle-container {
+    display: flex; /* Activate Flexbox */
+    align-items: center; /* Vertically center the items */
+    margin-bottom: 10px; /* Add some space below the toggle */
+    padding: 5px 0;
+}
+
+#enableToggle {
+    margin-right: 8px;
+    transform: scale(1.1);
+    /* Remove unnecessary top/bottom margins to let Flexbox handle vertical centering */
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+label[for="enableToggle"] {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* --- Form Styles --- */
+#addForm {
+    background-color: var(--surface-dark);
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    margin-bottom: 15px;
+}
+
+.form-group {
+    margin-bottom: 8px;
+}
+
 label {
-  font-size: 12px;
-  display: block;
-  margin-top: 8px;
-  color: #cccccc;
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
 }
+
 input[type="text"],
 textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 6px;
-  margin-top: 4px;
-  font-size: 13px;
-  background: #2d2d2d;
-  color: #f1f1f1;
-  border: 1px solid #444;
-  border-radius: 4px;
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.85rem;
+    background-color: #333;
+    color: var(--text-light);
+    transition: border-color 0.2s;
 }
+
+input[type="text"]:focus,
+textarea:focus {
+    border-color: var(--accent-orange);
+    outline: none;
+}
+
 textarea {
-  min-height: 90px;
-  resize: vertical;
+    resize: vertical;
+    min-height: 50px;
 }
-.template {
-  border: 1px solid #444;
-  padding: 8px;
-  margin-top: 8px;
-  border-radius: 6px;
-  background: #2a2a2a;
-}
-.tpl-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.keyword {
-  font-weight: 600;
-  min-width: 90px;
-  color: #ffd479;
-}
-.del {
-  margin-left: auto;
-  background: #d9534f;
-  color: white;
-  border: none;
-  padding: 6px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-}
+
+/* --- Buttons --- */
 button {
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #555;
-  background: #333;
-  color: #f1f1f1;
-  cursor: pointer;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    font-weight: 600;
+    font-size: 0.85rem;
 }
-button:hover {
-  background: #444;
+
+#saveButton {
+    background-color: var(--success-green);
+    color: var(--bg-dark); /* Dark text on green button */
+    margin-top: 8px;
 }
-.small {
-  font-size: 12px;
-  padding: 6px 8px;
+
+#saveButton:hover {
+    background-color: #388e3c;
+    transform: translateY(-1px);
 }
-.empty {
-  color: #888;
-  font-size: 13px;
-  margin-top: 8px;
+
+/* --- Prompt List Styles --- */
+#promptsList {
+    margin-top: 15px;
 }
-pre {
-  white-space: pre-wrap;
-  margin: 6px 0 0 0;
-  color: #dddddd;
+
+.prompt-item {
+    background-color: var(--surface-dark);
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.prompt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.prompt-shortcut {
+    font-weight: bold;
+    color: var(--accent-orange);
+    font-size: 0.95rem;
+}
+
+.prompt-expansion {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px dashed #333; /* Lighter dash line */
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
+.prompt-actions button {
+    padding: 3px 6px; /* Smaller buttons */
+    font-size: 0.7rem;
+    margin-left: 5px;
+}
+
+.editBtn {
+    background-color: var(--accent-orange);
+    color: var(--bg-dark);
+}
+
+.editBtn:hover {
+    background-color: var(--accent-hover);
+}
+
+.deleteBtn {
+    background-color: var(--danger-red);
+    color: white;
+}
+
+.deleteBtn:hover {
+    background-color: #d32f2f;
+}
+
+/* No Prompts Message */
+#promptsList p {
+    margin-left: 5px !important;
+    color: var(--text-muted) !important;
 }

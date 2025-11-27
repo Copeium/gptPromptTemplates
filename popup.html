@@ -1,28 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Prompt Templates</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="popup.css">
-
+  <title>Prompt Expander</title>
+  <link rel="stylesheet" href="popup.css"> 
 </head>
 <body>
-  <h1>ChatGPT Prompt Templates by Faith Lawrence</h1>
-
-  <div>
-    <label for="kw">Keyword (no leading #, use letters/numbers/_ or -)</label>
-    <input id="kw" type="text" placeholder="e.g. summary" />
-    <label for="tpl">Template text (what will be inserted)</label>
-    <textarea id="tpl" placeholder="Write the prompt/instructions here..."></textarea>
-    <div style="display:flex; gap:8px; margin-top:8px;">
-      <button id="add" class="small">Add / Update</button>
-      <button id="clearAll" class="small">Clear All</button>
+  <h2>Prompt Templates by Faith Lawrence Escano</h2>
+  
+<div id="toggle-container">
+  <input type="checkbox" id="enableToggle">
+  <label for="enableToggle">Enable Prompt Expander</label>
+</div>
+  
+  <div id="addForm">
+    <h3>Add/Edit Prompt</h3>
+    <div class="form-group">
+      <label for="shortcut">Shortcut (must start with #):</label>
+      <input type="text" id="shortcut" placeholder="#ai-persona" required>
     </div>
+    <div class="form-group">
+      <label for="expansion">Text:</label>
+      <textarea id="expansion" rows="4" required></textarea>
+    </div>
+    <button id="saveButton">Save Prompt</button>
   </div>
 
-  <h2 style="font-size:13px; margin-top:12px;">Saved templates</h2>
-  <div id="list"></div>
+  <div id="promptsList">
+    <h3>Current Prompts</h3>
+    </div>
 
   <script src="popup.js"></script>
 </body>

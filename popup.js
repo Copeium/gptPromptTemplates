@@ -1,74 +1,134 @@
-const kwEl = document.getElementById('kw');
-const tplEl = document.getElementById('tpl');
-const addBtn = document.getElementById('add');
-const listEl = document.getElementById('list');
-const clearAllBtn = document.getElementById('clearAll');
+// popup.js
+const PROMPT_STORAGE_KEY = 'geminiPrompts';
+const ENABLED_KEY = 'isPromptExpanderEnabled';
 
-function loadList() {
-  chrome.storage.local.get({templates: {}}, data => {
-    const templates = data.templates || {};
-    renderList(templates);
+const promptsListEl = document.getElementById('promptsList');
+const saveButton = document.getElementById('saveButton');
+const shortcutInput = document.getElementById('shortcut');
+const expansionInput = document.getElementById('expansion');
+const enableToggle = document.getElementById('enableToggle');
+
+let currentPrompts = {};
+
+// --- CRUD Functions (Create, Read, Update, Delete) ---
+
+/**
+ * Loads all prompts and the enabled status from storage.
+ */
+function loadAll() {
+  chrome.storage.sync.get([PROMPT_STORAGE_KEY, ENABLED_KEY], (data) => {
+    currentPrompts = data[PROMPT_STORAGE_KEY] || {};
+    // Checkbox state: true unless explicitly set to false
+    enableToggle.checked = data[ENABLED_KEY] !== false; 
+    renderPrompts();
   });
 }
 
-function renderList(templates) {
-  listEl.innerHTML = '';
-  const keys = Object.keys(templates).sort((a,b)=>a.localeCompare(b));
-  if (keys.length === 0) {
-    listEl.innerHTML = '<div class="empty">No templates yet. Add one above.</div>';
-    return;
+/**
+ * Renders the list of prompts to the popup UI.
+ */
+function renderPrompts() {
+  promptsListEl.innerHTML = '<h3>Current Prompts</h3>'; // Clear and re-add heading
+  
+  if (Object.keys(currentPrompts).length === 0) {
+      promptsListEl.innerHTML += '<p style="font-size: 0.9rem; color: #999; margin-left: 10px;">No prompts saved yet. Add one above!</p>';
+      return;
   }
-  keys.forEach(k => {
-    const t = templates[k];
-    const div = document.createElement('div');
-    div.className = 'template';
-    div.innerHTML = `
-      <div class="tpl-row">
-        <div class="keyword">#${escapeHtml(k)}</div>
-        <button class="del" data-key="${escapeHtml(k)}">Delete</button>
+
+  for (const shortcut in currentPrompts) {
+    const expansion = currentPrompts[shortcut];
+    const item = document.createElement('div');
+    item.className = 'prompt-item';
+    
+    // Structure for better visibility, same as before
+    item.innerHTML = `
+      <div class="prompt-header">
+        <span class="prompt-shortcut">${shortcut}</span>
+        <div class="prompt-actions">
+          <button data-shortcut="${shortcut}" class="editBtn">Edit</button>
+          <button data-shortcut="${shortcut}" class="deleteBtn">Delete</button>
+        </div>
       </div>
-      <pre style="white-space:pre-wrap; margin:6px 0 0 0;">${escapeHtml(t)}</pre>
+      <div class="prompt-expansion">${expansion}</div>
     `;
-    listEl.appendChild(div);
-  });
-
-  listEl.querySelectorAll('.del').forEach(btn => {
-    btn.addEventListener('click', e => {
-      const key = e.currentTarget.dataset.key;
-      chrome.storage.local.get({templates:{}}, data=>{
-        const templates = data.templates || {};
-        delete templates[key];
-        chrome.storage.local.set({templates}, () => loadList());
-      });
-    });
-  });
+    promptsListEl.appendChild(item);
+  }
 }
 
-addBtn.addEventListener('click', ()=>{
-  const key = kwEl.value.trim();
-  const tpl = tplEl.value;
-  if (!key.match(/^[\w-]+$/)) {
-    alert('Keyword required. Use letters, numbers, underscore or hyphen only (no spaces).');
+/**
+ * Handles saving a new or edited prompt.
+ */
+saveButton.addEventListener('click', () => {
+  let shortcut = shortcutInput.value.trim();
+  const expansion = expansionInput.value.trim();
+
+  if (!shortcut || !expansion) {
+    alert('Both shortcut and expansion text are required.');
     return;
   }
-  chrome.storage.local.get({templates:{}}, data=>{
-    const templates = data.templates || {};
-    templates[key] = tpl;
-    chrome.storage.local.set({templates}, ()=> {
-      kwEl.value = '';
-      tplEl.value = '';
-      loadList();
-    });
+  
+  // Enforce the '#' prefix
+  if (!shortcut.startsWith('#')) {
+    shortcut = '#' + shortcut;
+  }
+  
+  currentPrompts[shortcut] = expansion;
+
+  chrome.storage.sync.set({ [PROMPT_STORAGE_KEY]: currentPrompts }, () => {
+    // Notify the content script to reload the prompts
+    notifyContentScript('statusChange');
+    loadAll(); // Re-render the list immediately
+    shortcutInput.value = '';
+    expansionInput.value = '';
   });
 });
 
-clearAllBtn.addEventListener('click', ()=>{
-  if (!confirm('Delete ALL templates?')) return;
-  chrome.storage.local.set({templates:{}} , () => loadList());
+/**
+ * Handles edit and delete actions via event delegation.
+ */
+promptsListEl.addEventListener('click', (e) => {
+  const target = e.target;
+  const shortcut = target.dataset.shortcut;
+
+  if (target.className.includes('deleteBtn') && confirm(`Delete prompt ${shortcut}?`)) {
+    delete currentPrompts[shortcut];
+    chrome.storage.sync.set({ [PROMPT_STORAGE_KEY]: currentPrompts }, () => {
+      notifyContentScript('statusChange');
+      loadAll(); // Re-render the list immediately
+    });
+  } else if (target.className.includes('editBtn')) {
+    // Populate the form with the current prompt for editing
+    shortcutInput.value = shortcut;
+    expansionInput.value = currentPrompts[shortcut];
+  }
 });
 
-function escapeHtml(s) {
-  return (s+'').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});
+// --- Status Toggle ---
+
+/**
+ * Handles the enable/disable toggle.
+ */
+enableToggle.addEventListener('change', () => {
+  const isEnabled = enableToggle.checked;
+  chrome.storage.sync.set({ [ENABLED_KEY]: isEnabled }, () => {
+    // Notify the content script of the status change
+    notifyContentScript('statusChange'); 
+  });
+});
+
+// --- Communication ---
+
+/**
+ * Sends a message to the content script running on gemini.google.com
+ */
+function notifyContentScript(action) {
+  chrome.tabs.query({url: "https://gemini.google.com/*"}, function(tabs) {
+    if (tabs.length > 0) {
+      // Send the message to the first matching tab
+      chrome.tabs.sendMessage(tabs[0].id, { action: action });
+    }
+  });
 }
 
-loadList();
+// 🔑 CRITICAL FIX: Start the process by loading everything when the popup opens
+loadAll();
